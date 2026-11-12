@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Memecraft Panel Universal — Tutorial de Uso</title>
+<style>
+  :root{
+    --obsidian:#0b0c10; --card:#101118; --deep:#12131c; --frame:#151622;
+    --slate:#222436; --crimson:#ef4444; --rose:#f87171; --deep-red:#dc2626;
+    --pearl:#f3f4f6; --silver:#9ca3af; --muted:#6b7280; --emerald:#10b981;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:radial-gradient(ellipse at top, #1a0d0d 0%, var(--obsidian) 55%);
+    color:var(--pearl); font-family:'Segoe UI',system-ui,sans-serif;
+    line-height:1.6; padding:48px 20px; min-height:100vh;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+
+  /* ---------- ANIMACIONES ---------- */
+  @keyframes fadeInUp{
+    0%{opacity:0;transform:translateY(22px)}
+    100%{opacity:1;transform:translateY(0)}
+  }
+  @keyframes slideInLeft{
+    0%{opacity:0;transform:translateX(-18px)}
+    100%{opacity:1;transform:translateX(0)}
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}
+    50%{box-shadow:0 0 0 7px rgba(239,68,68,.12)}
+  }
+  @keyframes pulseGreen{
+    0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}
+    50%{box-shadow:0 0 0 7px rgba(16,185,129,.15)}
+  }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes progressFill{
+    0%{width:0}
+    100%{width:var(--to,100%)}
+  }
+  @keyframes float{
+    0%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+    100%{transform:translateY(0)}
+  }
+  @keyframes glow{
+    0%,100%{filter:drop-shadow(0 0 8px rgba(239,68,68,.35))}
+    50%{filter:drop-shadow(0 0 20px rgba(239,68,68,.75))}
+  }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1);
+  }
+  .reveal.visible{
+    opacity:1;
+    transform:none;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    text-align:center; margin-bottom:52px; padding:40px 24px;
+    background:linear-gradient(180deg,rgba(239,68,68,.10),transparent);
+    border:1px solid var(--slate); border-radius:16px; position:relative; overflow:hidden;
+    animation:fadeInUp 0.9s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  header::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,transparent,var(--crimson),transparent)}
+  .logo{
+    width:66px;height:66px;margin:0 auto 16px;border-radius:18px;
+    background:linear-gradient(135deg,var(--deep-red),#7f1d1d);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 40px rgba(239,68,68,.35);
+    animation:float 4s ease-in-out infinite,glow 2.5s ease-in-out infinite;
+  }
+  .logo svg{width:34px;height:34px;fill:#fff}
+  h1{font-size:34px;font-weight:800;letter-spacing:-.5px}
+  h1 span{color:var(--crimson)}
+  .sub{color:var(--rose);font-size:14px;font-weight:600;letter-spacing:2px;margin-top:6px}
+  .meta{color:var(--muted);font-size:13px;margin-top:16px}
+
+  /* ---------- STEP ---------- */
+  .step{
+    background:var(--card); border:1px solid var(--slate);
+    border-radius:14px; margin-bottom:28px; overflow:hidden;
+    transition:border-color .25s,transform .25s,box-shadow .25s;
+  }
+  .step:hover{border-color:rgba(239,68,68,.45);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .step-head{
+    display:flex;align-items:center; gap:14px;
+    padding:18px 22px; background:var(--deep);
+    border-bottom:1px solid var(--slate);
+  }
+  .num{
+    min-width:38px;height:38px;border-radius:11px;
+    background:rgba(239,68,68,.14); border:1px solid rgba(239,68,68,.4);
+    color:var(--rose); font-weight:800; font-size:17px;
+    display:flex;align-items:center;justify-content:center;
+    animation:slideInLeft 0.5s forwards;
+  }
+  .step-head h2{font-size:17px;font-weight:700}
+  .step-head .tag{margin-left:auto;font-size:11px;color:var(--muted);
+    border:1px solid var(--slate);border-radius:20px;padding:3px 11px;white-space:nowrap}
+  .step-body{padding:20px 22px}
+  .step-body p{color:#d1d5db;font-size:14.5px;margin-bottom:14px}
+  .step-body p:last-child{margin-bottom:0}
+  .step-body b,.step-body strong{color:#fff}
+  .step-body kbd{
+    background:var(--frame);border:1px solid var(--slate);border-bottom-width:2px;
+    border-radius:6px;padding:1px 7px;font-family:monospace;font-size:12.5px;color:var(--rose);
+  }
+  .warn{
+    margin-top:14px;padding:12px 14px;border-radius:9px;font-size:13.5px;
+    background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);color:#fde68a;
+    animation:slideInLeft 0.5s forwards;
+  }
+  .ok{
+    margin-top:14px;padding:12px 14px;border-radius:9px;font-size:13.5px;
+    background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);color:#a7f3d0;
+    animation:slideInLeft 0.5s forwards;
+  }
+
+  /* ---------- LEDS animados ---------- */
+  .led{
+    display:inline-block;width:9px;height:9px;border-radius:50%;
+    background:var(--crimson);box-shadow:0 0 8px var(--crimson);
+    animation:pulse 2s infinite;
+  }
+  .led.green{background:var(--emerald);box-shadow:0 0 8px var(--emerald);animation:pulseGreen 2s infinite}
+
+  /* ---------- MOCK SCREENS ---------- */
+  .mock{
+    margin-top:16px;border-radius:10px;overflow:hidden;
+    border:1px solid var(--slate);background:#000;
+    font-family:'Consolas',monospace;font-size:12.5px;line-height:1.75;
+    animation:fadeInUp 0.6s forwards;
+  }
+  .mock-bar{
+    display:flex;align-items:center;gap:6px;padding:7px 12px;
+    background:#141519;border-bottom:1px solid #23252c;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:#3f3f46}
+  .dot.r{background:var(--deep-red)}.dot.y{background:#a16207}
+  .mock-bar span{margin-left:8px;color:#52525b;font-size:11px}
+  .mock-body{padding:14px 16px;white-space:pre;overflow-x:auto}
+  .c-red{color:var(--crimson)}.c-green{color:var(--emerald)}
+  .c-gray{color:var(--muted)}.c-white{color:#fff}.c-yellow{color:#fbbf24}
+  .c-blue{color:#60a5fa}
+
+  .mock-ui{background:#1a1a20;padding:0}
+  .mock-head{
+    padding:12px 16px;background:#17171d;border-bottom:1px solid #2a2b33;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .mock-head .t{color:#fff;font-weight:700;font-size:13px;font-family:'Segoe UI',sans-serif}
+  .mock-head .badge{font-size:10px;color:var(--rose);border:1px solid rgba(239,68,68,.4);
+    border-radius:4px;padding:1px 6px}
+  .mock-input{
+    background:var(--frame);border:1px solid var(--slate);border-radius:6px;
+    padding:8px 12px;color:#6b7280;font-size:12.5px;margin:8px 8px 0;
+    font-family:'Segoe UI',sans-serif;
+  }
+  .mock-input.filled{color:#fff}
+  .mock-btn{
+    margin:12px 8px;padding:9px 0;text-align:center;border-radius:8px;
+    background:var(--deep-red);color:#fff;font-weight:700;font-size:12.5px;
+    font-family:'Segoe UI',sans-serif;
+    animation:pulse 2.5s infinite;
+  }
+  .mock-check{color:#9ca3af;font-size:12px;padding:8px 8px 0;font-family:'Segoe UI',sans-serif}
+
+  /* ---------- PROGRESS BAR ---------- */
+  .progress{
+    margin-top:12px;height:6px;background:#12131c;border-radius:3px;overflow:hidden;
+    border:1px solid var(--slate);
+  }
+  .progress-bar{
+    height:100%;background:linear-gradient(90deg,var(--crimson),var(--rose));
+    border-radius:3px;width:0;animation:progressFill 1.2s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  /* ---------- TABLE ---------- */
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px}
+  th{
+    text-align:left;padding:10px 12px;background:var(--deep);color:#fff;
+    border:1px solid var(--slate);font-size:12px;letter-spacing:.5px;text-transform:uppercase;
+  }
+  td{padding:9px 12px;border:1px solid var(--slate);color:#d1d5db;vertical-align:top}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  td kbd{display:inline-block;min-width:64px;text-align:center}
+  tr:hover td{background:rgba(239,68,68,.08)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+  .tile{
+    background:var(--frame);border:1px solid var(--slate);border-radius:10px;padding:14px;
+    transition:transform .2s,border-color .2s;
+  }
+  .tile:hover{transform:translateY(-2px);border-color:rgba(239,68,68,.45)}
+  .tile .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .tile .v{font-size:14px;color:#fff;font-weight:600;margin-top:4px;word-break:break-all}
+
+  footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:40px;padding-top:24px;
+    border-top:1px solid var(--slate);animation:fadeInUp 1s forwards}
+  @media(max-width:600px){h1{font-size:26px}.step-head .tag{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M13.5 1L5 10h4v4H5l8.5 9L20 13h-4V9h4L13.5 1z"/></svg>
+  </div>
+  <h1>A MEMECRAFT <span>PANEL UNIVERSAL</span></h1>
+  <div class="sub">TUTORIAL DE USO</div>
+  <div class="meta">Sigue los pasos en orden · No cierres la consola mientras juegas</div>
+</header>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">1</div>
+    <h2>Abre el emulador como Administrador</h2>
+    <span class="tag">obligatorio para el lag</span>
+  </div>
+  <div class="step-body">
+    <p>Abre <b>MSI App Player</b> (o BlueStacks) <b>con clic derecho → Ejecutar como administrador</b> y espera a que cargue <b>completo</b> la pantalla de inicio del emulador con sus iconos.</p>
+    <div class="warn">No abras Free Fire todavía — la consola lo abre sola. Solo necesitas que el emulador esté corriendo.</div>
+    <div class="warn"><b>¿Por qué como administrador?</b> Las funciones de lag (globo) manipulan la red del emulador con WinDivert. Windows solo deja abrir ese dispositivo a un proceso elevado. Sin admin el panel te lo dice en el menú del globo: <i>«Acceso denegado: abre el emulador como ADMINISTRADOR»</i>.</div>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>HD-Player.exe</span></div>
+      <div class="mock-body"><span class="c-gray">  ┌──────────────────────────────┐</span>
+<span class="c-gray">  │</span>   <span class="c-white">MSI App Player</span>  <span class="c-gray">listo</span>        <span class="c-gray">│</span>
+<span class="c-gray">  └──────────────────────────────┘</span>
+   <span class="c-green">✔</span> emulador cargado
+   <span class="c-gray">→ ahora ejecuta la consola</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">2</div>
+    <h2>Ejecuta la consola como Administrador</h2>
+    <span class="tag">auto-elevación</span>
+  </div>
+  <div class="step-body">
+    <p>Abre <b>A Memecraft Panel Universal.exe</b>. Si no tienes permisos de administrador, te lo pedirá solo — pulsa cualquier tecla y acepta el aviso de Windows.</p>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>A Memecraft Panel Universal.exe</span></div>
+      <div class="mock-body"><span class="c-red">  ██████╗ </span><span class="c-white">█████╗ </span><span class="c-red">███╗   ██╗</span>
+<span class="c-red">  ██╔══██╗</span><span class="c-white">██╔══██╗</span><span class="c-red">████╗  ██║</span>
+<span class="c-red">  ██║  ██║</span><span class="c-white">███████║</span><span class="c-red">██╔██╗ ██║</span>
+<span class="c-red">  ██║  ██║</span><span class="c-white">██╔══██║</span><span class="c-red">██║╚██╗██║</span>
+<span class="c-red">  ██████╔╝</span><span class="c-white">██║  ██║</span><span class="c-red">██║ ╚████║</span>
+<span class="c-gray">  v3.0 • 2026-11-11</span>
+
+<span class="c-yellow">  [!] </span>Este programa necesita permisos de Administrador.
+<span class="c-gray">  Presiona cualquier tecla para solicitar elevación...</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">3</div>
+    <h2>Inicia sesión</h2>
+    <span class="tag">user + pass</span>
+  </div>
+  <div class="step-body">
+    <p>Escribe tu <b>usuario</b> y <b>contraseña</b>. Si marcas <b>"Recordar usuario"</b>, la próxima vez aparecerán ya rellenados.</p>
+    <p>Pulsa <b>SECURE LOGIN</b> y espera — se conecta al servidor para validar tu licencia.</p>
+    <div class="mock mock-ui">
+      <div class="mock-head"><span class="t">A Memecraft Panel Universal</span><span class="badge">Universal Edition</span></div>
+      <div class="mock-body" style="font-family:'Segoe UI',sans-serif;white-space:normal">
+        <div style="text-align:center;color:#fff;font-weight:700;letter-spacing:1px;padding:6px 0">LOGIN</div>
+        <div class="mock-input filled">tu_usuario</div>
+        <div class="mock-input filled">••••••••••</div>
+        <div class="mock-check">☑ Recordar usuario</div>
+        <div class="mock-btn">SECURE LOGIN</div>
+      </div>
+    </div>
+    <div class="ok">Si la sesión está caducada saldrá un aviso rojo y se abrirá el Discord para renovar.</div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">4</div>
+    <h2>Descarga e inyección automática</h2>
+    <span class="tag">auto-update</span>
+  </div>
+  <div class="step-body">
+    <p>La consola descarga sola la última versión del panel desde el servidor y la inyecta en el emulador. <b>No toques nada</b>, solo espera a que termine.</p>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>consola</span></div>
+      <div class="mock-body"><span class="c-blue">  [i] </span>Descargando A Memecraft Panel Universal.dll...
+  <span class="c-white">[██████████████████████████████] 100.0%</span>
+  <span class="c-green">[+] DLL descargada correctamente.</span>
+<span class="c-blue">  [i] </span>Pre-cargando WinDivert.dll en el emulador...
+  <span class="c-green">[OK] Driver WinDivert instalado y verificado.</span>
+  <span class="c-green">[OK] WinDivert.dll residente. El panel lo encontrará.</span>
+<span class="c-yellow">  [!] </span>Inyectando Panel Universal...
+  <span class="c-green">[OK] Injected. Remote module base: 0x7FF9A2C41000</span>
+<div class="progress"><div class="progress-bar" style="--to:100%"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">5</div>
+    <h2>Pulsa INSERT para abrir el menú</h2>
+    <span class="tag">tecla del menú</span>
+  </div>
+  <div class="step-body">
+    <p>Con el panel inyectado, pulsa <kbd>INSERT</kbd> para mostrar el menú sobre el juego. Vuelve a pulsarlo para ocultarlo.</p>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>Dashboard</span></div>
+      <div class="mock-body"><span class="c-gray">┌─ System / Initializing ─────────────┐</span>
+<span class="c-gray">│</span>            <span class="c-red">◐</span>                       <span class="c-gray">│</span>
+<span class="c-gray">│</span>   <span class="c-white">Conectando con el emulador...</span>   <span class="c-gray">│</span>
+<span class="c-gray">└────────────────────────────────────┘</span>
+   <span class="c-gray">pulsa INSERT otra vez para ocultar</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">6</div>
+    <h2>Conecta Free Fire</h2>
+    <span class="tag">paso obligatorio</span>
+  </div>
+  <div class="step-body">
+    <p>En la pantalla <b>Set Process</b> pulsa el botón <b>"Connect Free Fire"</b>. El panel abrirá el juego y conectará por ADB — tarda entre 10 y 40 segundos.</p>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>Set Process</span></div>
+      <div class="mock-body"><span class="c-green">  ● READY</span><span class="c-gray"> </span><span class="c-green">-  A Memecraft Panel Universal</span><span class="c-gray">  -  FPS 60</span>
+<span class="c-gray">  ────────────────────────────────</span>
+
+   <span class="c-red">╔═══════════════════════════╗</span>
+   <span class="c-red">║</span>      <span class="c-white">Connect Free Fire</span>     <span class="c-red">║</span>
+   <span class="c-red">╚═══════════════════════════╝</span>
+
+<span class="c-gray">  Free Fire emulator running</span></div>
+    </div>
+    <div class="warn">Si sale "Retry System Init" o "Retry", vuelve a pulsar el botón. A veces el emulador tarda en publicar el puerto ADB y necesita otro intento.</div>
+    <div class="ok">Cuando conecte, el menú pasa solo a la pestaña <b>Combat</b> y ya puedes jugar.</div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">7</div>
+    <h2>Panel de funciones activas</h2>
+    <span class="tag">tecla HOME</span>
+  </div>
+  <div class="step-body">
+    <p>Pulsa <kbd>HOME</kbd> para ver qué funciones tienes activas y con qué tecla. <b>LED verde = activo</b>, <b>rojo = apagado</b>. La ventana se puede mover con el ratón.</p>
+    <div class="mock">
+      <div class="mock-bar"><i class="dot r"></i><i class="dot y"></i><i class="dot"></i><span>Keybind Functions</span></div>
+      <div class="mock-body"><span class="c-red">  COMBAT</span>
+  <span class="led green"></span> Silent Aim      <span class="c-gray">F5</span>
+  <span class="c-red">●</span> Aim Visible     <span class="c-gray">—</span>
+  <span class="led green"></span> Blade Aim       <span class="c-gray">—</span>
+<span class="c-red">  EXPLOITS</span>
+  <span class="led green"></span> Aimbot           <span class="c-gray">—</span>
+  <span class="led green"></span> Teleport Kill    <span class="c-gray">—</span>
+<span class="c-gray">  VISUALS</span>
+  <span class="c-red">●</span> Fix ESP          <span class="c-gray">—</span>
+
+<span class="c-gray">  12 teclas  /  5 activas</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">8</div>
+    <h2>Cambiar una tecla</h2>
+    <span class="tag">re-asignar</span>
+  </div>
+  <div class="step-body">
+    <p>En el menú, pulsa el recuadro de la <b>tecla</b> que quieras cambiar, se pondrá en modo <b>"..."</b> y solo tienes que <b>pulsar la nueva tecla</b>. Con <kbd>ESC</kbd> la dejas sin asignar.</p>
+    <div class="mock mock-ui">
+      <div class="mock-head"><span class="t">Rage &amp; Aim Visible</span><span class="badge">Combat</span></div>
+      <div class="mock-body" style="font-family:'Segoe UI',sans-serif;white-space:normal">
+        <div style="color:#9ca3af;font-size:12.5px;padding:10px 8px 4px">☐ AIM VISIBLE <span style="color:#fbbf24">[ RIESGO ]</span></div>
+        <div style="display:flex;justify-content:space-between;padding:0 8px;font-size:12.5px">
+          <span style="color:#e5e7eb">Aim Visible Toggle</span>
+          <span style="background:#12131c;border:1px solid #ef4444;border-radius:5px;padding:2px 10px;color:#f87171">...</span>
+        </div>
+        <div style="color:#fbbf24;font-size:12px;padding:10px 8px">↳ pulsa la tecla que quieras usar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">9</div>
+    <h2>Al terminar</h2>
+    <span class="tag">cierre limpio</span>
+  </div>
+  <div class="step-body">
+    <p>Cierra la consola o pulsa <b>UNLOAD PANEL</b> en la pestaña Ajustes. El panel cierra todo lo que abrió y la red del emulador vuelve a la normalidad.</p>
+    <div class="ok">Nunca cierres el emulador con el panel inyectado a la fuerza — descarga siempre primero para no dejarlo sin red.</div>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">10</div>
+    <h2>Referencia rápida de teclas</h2>
+    <span class="tag">atajos</span>
+  </div>
+  <div class="step-body">
+    <table>
+      <tr><th>Tecla</th><th>Función</th></tr>
+      <tr><td><kbd>INSERT</kbd></td><td>Abrir / cerrar el menú principal</td></tr>
+      <tr><td><kbd>HOME</kbd></td><td>Panel de funciones activas y sus teclas</td></tr>
+      <tr><td><kbd>Click izq.</kbd></td><td>Disparar (activa el lag switch y los aimbots configurados)</td></tr>
+      <tr><td><kbd>W A S D</kbd></td><td>Volar con No Gravity / KC Fly</td></tr>
+      <tr><td><kbd>Espacio</kbd></td><td>Subir al volar</td></tr>
+      <tr><td><kbd>Ctrl izq.</kbd></td><td>Bajar al volar</td></tr>
+      <tr><td><kbd>Alt</kbd></td><td>Fijar la altura actual (Rapid Fly)</td></tr>
+      <tr><td><kbd>ESC</kbd></td><td>Borrar una tecla asignada</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="step reveal">
+  <div class="step-head">
+    <div class="num">11</div>
+    <h2>Problemas frecuentes</h2>
+    <span class="tag">solución</span>
+  </div>
+  <div class="step-body">
+    <table>
+      <tr><th>Síntoma</th><th>Solución</th></tr>
+      <tr><td>"HD-Player no encontrado"</td><td>El emulador no está abierto. Ábrelo y ejecuta la consola de nuevo</td></tr>
+      <tr><td>Las funciones de lag no cortan</td><td>Abre el emulador <b>como Administrador</b>. El menú del globo muestra el motivo exacto: «Acceso denegado» = falta admin, «Driver ausente» = usa la consola o el inyector como admin</td></tr>
+      <tr><td>"Error al iniciar" del WinDivert</td><td>Faltan <code>WinDivert.dll</code> y <code>WinDivert64.sys</code> junto al ejecutable</td></tr>
+      <tr><td>Se cierra todo al inyectar</td><td>Ejecuta como Administrador y cierra otros inyectores primero</td></tr>
+      <tr><td>No conecta ADB</td><td>Pulsa "Retry System Init" 2 o 3 veces; el emulador tarda en abrir el puerto</td></tr>
+      <tr><td>Se cierra el menú solo</td><td>Has pulsado INSERT otra vez sin querer</td></tr>
+      <tr><td>No aparecen las funciones</td><td>Estíra la ventana del menú: las pestañas de espada, camisa y globo son redimensionables</td></tr>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div class="grid">
+    <div class="tile"><div class="k">DLL</div><div class="v">A Memecraft Panel Universal.dll</div></div>
+    <div class="tile"><div class="k">Consola</div><div class="v">A Memecraft Panel Universal.exe</div></div>
+    <div class="tile"><div class="k">Tecla del menú</div><div class="v">INSERT</div></div>
+    <div class="tile"><div class="k">Tecla de keybinds</div><div class="v">HOME</div></div>
+  </div>
+  <p style="margin-top:22px">A Memecraft Panel Universal · Memecraft · Tutorial v1.0</p>
+</footer>
+
+</div>
+<script>
+  // Revelado escalonado al hacer scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -80px 0px' });
+
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.animationDelay = (i * 0.14) + 's';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
